@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 ############################################################################
 # children - A list of HTMLNode objects representing the children of this node
 ############################################################################
