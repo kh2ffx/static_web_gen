@@ -147,4 +147,12 @@ def markdown_to_html_node(markdown):
         future_parent.append(future_child)
     return ParentNode("div", future_parent)
 
-
+def extract_title(markdown):
+    block_list = markdown_to_blocks(markdown)
+    for block in block_list:
+        if block_to_blocktype(block) is BlockType.HEADING:
+            if find_the_header_number(block) == 1:
+                title_block = line_stripper(BlockType.HEADING, block)
+                return title_block
+    # no h1 header found
+    raise Exception("Document does not have a title")

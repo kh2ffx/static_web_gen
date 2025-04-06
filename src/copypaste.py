@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# remove this shebang and make file not executable when finished
-
 import os
 import shutil
 
@@ -16,18 +13,15 @@ def delete_destination(path_to_destination):
         raise ValueError(f"{path_to_destination} does not exist")
 
 # will take list of file paths
-def make_destinations(file_paths):
-    for file_path in file_paths:
-        path = file_path.split("/")
-        
-    os.mkdir(path_to_destination, mode=0o777)
+def make_destination(file_path):
+    os.mkdir(file_path, mode=0o777)
 
 # does Not do what it says ৻( •̀ ᗜ •́ ৻)
 # takes file path "source"
 # returns dictionary every folder inside is a dictionary with folder name
 # as key.  Files have value None
+# fatal flaw: does not return original source at head of dictionary, should fix later
 def list_paths(source):
-
     if os.path.isfile(source):
         return source
     file_list = os.listdir(source)
@@ -39,9 +33,24 @@ def list_paths(source):
             final_dict[file] = list_paths(source + "/" + file)
     return final_dict
 
+def copy_tree(file_tree, source, destination):
+    for folder in file_tree:
+        if file_tree[folder] == None:
+           shutil.copy(source + "/" + folder, destination)
+        else:
+            make_destination(destination + "/" + folder)
+            copy_tree(file_tree[folder], source + "/" + folder, destination + "/" + folder)
 
-path_to_destination = "public"
-path_to_source = "static"
-#delete_destination(path_to_destination)
-#make_destination(path_to_destination)
-print(list_paths(path_to_source))
+def copy_paste(source, destination):
+    # Step 1: delete current destination
+    if os.path.exists(destination):
+        delete_destination(destination)
+
+    # Step 2: get a list of files in the source
+    files_to_copy = list_paths(source)
+
+    # Step 3: parse files and find out which are folder.  Make folders in destination
+    make_destination(destination)
+    copy_tree(files_to_copy, source, destination)            
+
+
