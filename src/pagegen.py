@@ -3,7 +3,7 @@ from blocks import markdown_to_html_node, extract_title
 from htmlnode import LeafNode 
 from copypaste import copy_tree, list_paths
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, BASEPATH):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     #open
@@ -21,7 +21,9 @@ def generate_page(from_path, template_path, dest_path):
     file_contents = from_file.to_html()
 
     template_file_two = template_file.replace("{{ Title }}", title)
-    final_file = template_file_two.replace("{{ Content }}", file_contents)
+    template_file_three = template_file_two.replace("{{ Content }}", file_contents)
+    template_file_four = template_file_three.replace("href=\"/", f"href=\"{BASEPATH}")
+    final_file = template_file_four.replace("src=\"/", f"src=\"{BASEPATH}")
     
     # I hate the whole idea of this and I've probably done it in a stupid way
     # I will fix this one day (probably not)
@@ -42,23 +44,26 @@ def generate_page(from_path, template_path, dest_path):
     dest_file_ptr.close()
 
 # adding this here, but I should replace a function in copypaste with this one
-def recursive_pagegen_helper(directory, template_path):
+def recursive_pagegen_helper(directory, template_path, BASEPATH):
     for file in os.listdir(directory):
         filepath = os.path.join(directory, file)
         if os.path.isfile(filepath) and file[len(file) - 3 :] == ".md":
-            generate_page(filepath, template_path, 
-            f"{filepath[:len(filepath) - 3]}.html")
+            generate_page(filepath, 
+                          template_path, 
+                          f"{filepath[:len(filepath) - 3]}.html",
+                          BASEPATH)
             #delete .md file later
         elif not os.path.isfile(filepath):
-            recursive_pagegen_helper(filepath, template_path)
+            recursive_pagegen_helper(filepath, template_path, BASEPATH)
 
 def recursive_pagegen(from_path_directory, 
                       template_path, 
-                      destination_path_directory):
+                      destination_path_directory,
+                      BASEPATH):
     # copy everything from content directory to public 
     copy_tree(list_paths(from_path_directory), 
               from_path_directory, 
               destination_path_directory)
     # Now I need to convert the markdown ".md" files in the public
     # directory to html 
-    recursive_pagegen_helper(destination_path_directory, template_path)
+    recursive_pagegen_helper(destination_path_directory, template_path, BASEPATH)

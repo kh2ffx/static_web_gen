@@ -1,16 +1,22 @@
 from textnode import TextNode, TextType
 from copypaste import copy_paste
 from pagegen import generate_page, recursive_pagegen
+import sys
+
+dir_path_static = "./static"
+dir_path_docs = "./docs"
+dir_path_content = "./content"
+templat_path = "./template.html"
+
+try:
+    BASEPATH = sys.argv[1]
+except IndexError:
+    BASEPATH = "/"
 
 def main():
     #copy_paste will need to be updated to handle different filepaths
-    source = "static"
-    destination = "public"
-    copy_paste(source, destination)
-    generate_page(f"content/index.md", 
-                  "template.html", 
-                  f"{destination}/index.html")
-    recursive_pagegen("content", "template.html", "public")
+    copy_paste(dir_path_static, dir_path_docs)
+    recursive_pagegen(dir_path_content, "template.html", dir_path_docs, BASEPATH)
 
 
 main()
